@@ -1,7 +1,7 @@
 {
-    "name": "Hackthon App",
-    "short_name": "Hackthon",
-    "start_url": "./verify.html",
+    "name": "NaniNana CARE",
+    "short_name": "NaniNana",
+    "start_url": "./index.html",
     "display": "standalone",
     "background_color": "#ffffff",
     "theme_color": "#0d6efd",
