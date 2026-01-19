@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adherence Report - NaniNana CARE</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <header>
+        <div class="container" style="display: flex; align-items: center; gap: 1rem;">
+            <a href="index.html" style="color: var(--text-main);"><i data-lucide="arrow-left"></i></a>
+            <h1 style="font-size: 1.5rem; margin: 0;">NaniNana CARE</h1>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="card fade-in">
+            <h3>Adherence Overview</h3>
+            <div style="height: 300px; margin: 1.5rem 0;">
+                <canvas id="adherenceChart"></canvas>
+            </div>
+            <div
+                style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; text-align: center; margin-top: 1rem;">
+                <div>
+                    <p style="font-size: 1.25rem; font-weight: 700; color: var(--primary);" id="total-doses">0</p>
+                    <p style="font-size: 0.75rem; color: var(--text-muted);">Total</p>
+                </div>
+                <div>
+                    <p style="font-size: 1.25rem; font-weight: 700; color: var(--secondary);" id="taken-doses">0</p>
+                    <p style="font-size: 0.75rem; color: var(--text-muted);">Taken</p>
+                </div>
+                <div>
+                    <p style="font-size: 1.25rem; font-weight: 700; color: var(--danger);" id="missed-doses">0</p>
+                    <p style="font-size: 0.75rem; color: var(--text-muted);">Missed</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card fade-in">
+            <h3>Health Summary</h3>
+            <p style="color: var(--text-muted);">Your medicine adherence is <strong id="adherence-perc"
+                    style="color: var(--primary);">0%</strong>. Keep up the good work to stay healthy!</p>
+
+            <div style="margin-top: 1.5rem; background: #f1f5f9; border-radius: 999px; height: 12px; overflow: hidden;">
+                <div id="adherence-bar"
+                    style="height: 100%; background: var(--primary); width: 0%; transition: width 1s;"></div>
+            </div>
+        </div>
+
+        <button class="btn btn-primary fade-in" onclick="window.print()">
+            <i data-lucide="download"></i> Download Report (PDF)
+        </button>
+    </main>
+
+    <nav class="nav-bottom">
+        <a href="index.html" class="nav-item">
+            <i data-lucide="home"></i>
+            <span>Home</span>
+        </a>
+        <a href="schedule.html" class="nav-item">
+            <i data-lucide="calendar"></i>
+            <span>Schedule</span>
+        </a>
+        <a href="reminder.html" class="nav-item">
+            <i data-lucide="bell"></i>
+            <span>Reminders</span>
+        </a>
+        <a href="profile.html" class="nav-item">
+            <i data-lucide="user"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <script src="app.js"></script>
+    <script>
+        lucide.createIcons();
+
+        function initReport() {
+            const logs = getData(STORAGE_KEYS.LOGS) || [];
+
+            // For demo, if no logs, add dummy data
+            let taken = logs.filter(l => l.status === 'Taken').length;
+            let missed = logs.filter(l => l.status === 'Missed').length;
+
+            if (taken === 0 && missed === 0) {
+                taken = 24;
+                missed = 4;
+            }
+
+            const total = taken + missed;
+            const perc = total > 0 ? Math.round((taken / total) * 100) : 0;
+
+            document.getElementById('total-doses').textContent = total;
+            document.getElementById('taken-doses').textContent = taken;
+            document.getElementById('missed-doses').textContent = missed;
+            document.getElementById('adherence-perc').textContent = perc + '%';
+            document.getElementById('adherence-bar').style.width = perc + '%';
+
+            // Chart
+            const ctx = document.getElementById('adherenceChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Taken', 'Missed'],
+                    datasets: [{
+                        data: [taken, missed],
+                        backgroundColor: ['#10b981', '#ef4444'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
+
+        initReport();
+    </script>
+</body>
+
+</html>

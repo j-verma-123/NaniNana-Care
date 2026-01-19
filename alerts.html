@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alerts History - NaniNana CARE</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <header>
+        <div class="container" style="display: flex; align-items: center; gap: 1rem;">
+            <a href="index.html" style="color: var(--text-main);"><i data-lucide="arrow-left"></i></a>
+            <h1 style="font-size: 1.5rem; margin: 0;">NaniNana CARE</h1>
+        </div>
+    </header>
+
+    <main class="container">
+        <div id="alerts-list">
+            <!-- Alerts injected here -->
+        </div>
+
+        <div id="empty-alerts" class="card fade-in" style="display: none; text-align: center; padding: 3rem;">
+            <i data-lucide="bell-off" size="48" style="color: var(--secondary); margin-bottom: 1rem;"></i>
+            <p style="color: var(--text-muted);">No recent family alerts. Good job!</p>
+        </div>
+    </main>
+
+    <nav class="nav-bottom">
+        <a href="index.html" class="nav-item">
+            <i data-lucide="home"></i>
+            <span>Home</span>
+        </a>
+        <a href="schedule.html" class="nav-item">
+            <i data-lucide="calendar"></i>
+            <span>Schedule</span>
+        </a>
+        <a href="reminder.html" class="nav-item">
+            <i data-lucide="bell"></i>
+            <span>Reminders</span>
+        </a>
+        <a href="profile.html" class="nav-item">
+            <i data-lucide="user"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <script src="app.js"></script>
+    <script>
+        lucide.createIcons();
+
+        function renderAlerts() {
+            const alerts = getData(STORAGE_KEYS.ALERTS) || [];
+            const list = document.getElementById('alerts-list');
+            const empty = document.getElementById('empty-alerts');
+
+            if (alerts.length === 0) {
+                list.style.display = 'none';
+                empty.style.display = 'block';
+                return;
+            }
+
+            list.style.display = 'block';
+            empty.style.display = 'none';
+            list.innerHTML = '';
+
+            alerts.forEach(alertItem => {
+                const card = document.createElement('div');
+                card.className = 'card fade-in';
+                card.style.borderLeft = '4px solid var(--danger)';
+                card.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div>
+                            <h3 style="color: var(--danger); margin-bottom: 0.25rem;">${alertItem.type}</h3>
+                            <p>Medicine: <strong>${alertItem.medicine}</strong></p>
+                            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem;">
+                                Missed on ${alertItem.date} at ${alertItem.time}
+                            </p>
+                            <div class="status-badge status-success" style="margin-top: 0.75rem; display: inline-block;">
+                                <i data-lucide="check" size="14"></i> Family Notified (${alertItem.contact})
+                            </div>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        renderAlerts();
+    </script>
+</body>
+
+</html>

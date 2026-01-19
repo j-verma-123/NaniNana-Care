@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scan Verification - NaniNana CARE</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
+</head>
+
+<body>
+    <header>
+        <div class="container" style="display: flex; align-items: center; gap: 1rem;">
+            <a href="index.html" style="color: var(--text-main);"><i data-lucide="arrow-left"></i></a>
+            <h1 style="font-size: 1.5rem; margin: 0;">NaniNana CARE</h1>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="card fade-in">
+            <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Please scan the label on your medicine strip to
+                verify it matches your schedule.</p>
+
+            <div id="scan-area"
+                style="border: 2px dashed var(--border); padding: 3rem; text-align: center; border-radius: var(--radius); cursor: pointer;"
+                onclick="document.getElementById('strip-input').click()">
+                <i data-lucide="scan" size="48" style="color: var(--primary); margin-bottom: 1rem;"></i>
+                <p style="font-weight: 600;">Point Camera at Medicine Label</p>
+                <input type="file" id="strip-input" hidden accept="image/*">
+            </div>
+
+            <div id="strip-preview-container" style="display: none; margin-top: 1.5rem;">
+                <img id="strip-preview" style="width: 100%; border-radius: var(--radius); margin-bottom: 1rem;">
+                <button class="btn btn-primary" id="verify-btn">
+                    <i data-lucide="shield-check"></i> Verify Medicine
+                </button>
+            </div>
+        </div>
+
+        <div id="verification-result" class="fade-in" style="display: none;">
+            <div class="card" id="result-card" style="text-align: center; padding: 2rem;">
+                <div id="result-icon"></div>
+                <h2 id="result-title">Verified</h2>
+                <p id="result-text" style="color: var(--text-muted); margin-bottom: 1.5rem;"></p>
+
+                <div id="result-actions" style="display: grid; gap: 1rem;">
+                    <button class="btn btn-primary" id="proceed-take-btn" style="background: var(--secondary);">
+                        Take Medicine Now
+                    </button>
+                    <button class="btn btn-outline" onclick="location.reload()">
+                        Scan Again
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="scan-loading" style="display: none; text-align: center; margin-top: 1rem;">
+            <div
+                style="display: inline-block; width: 40px; height: 40px; border: 4px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite;">
+            </div>
+            <p style="margin-top: 0.5rem; color: var(--text-muted);">Verifying with schedule...</p>
+        </div>
+    </main>
+
+    <style>
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .match-success {
+            border: 4px solid var(--secondary) !important;
+            color: #065f46;
+        }
+
+        .match-fail {
+            border: 4px solid var(--danger) !important;
+            color: #991b1b;
+        }
+    </style>
+
+    <script src="app.js"></script>
+    <script>
+        lucide.createIcons();
+
+        const stripInput = document.getElementById('strip-input');
+        const stripPreviewContainer = document.getElementById('strip-preview-container');
+        const stripPreview = document.getElementById('strip-preview');
+        const verifyBtn = document.getElementById('verify-btn');
+        const scanArea = document.getElementById('scan-area');
+        const verificationResult = document.getElementById('verification-result');
+        const scanLoading = document.getElementById('scan-loading');
+
+        stripInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    stripPreview.src = event.target.result;
+                    stripPreviewContainer.style.display = 'block';
+                    scanArea.style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        verifyBtn.onclick = async () => {
+            scanLoading.style.display = 'block';
+            verifyBtn.disabled = true;
+
+            try {
+                const result = await Tesseract.recognize(stripPreview.src, 'eng');
+                const text = result.data.text.toLowerCase();
+                console.log("OCR Text:", text);
+
+                // Get scheduled medicines
+                const schedule = getData(STORAGE_KEYS.SCHEDULE) || [];
+
+                let matchedMed = null;
+                for (const med of schedule) {
+                    if (text.includes(med.name.toLowerCase())) {
+                        matchedMed = med;
+                        break;
+                    }
+                }
+
+                showResult(matchedMed !== null, matchedMed ? matchedMed.name : "Scheduled Medicines", text);
+            } catch (err) {
+                console.error(err);
+                showResult(false, "Verification Error", "Could not read text from image.");
+            } finally {
+                scanLoading.style.display = 'none';
+                verifyBtn.style.display = 'none';
+            }
+        };
+
+        function showResult(success, expectedName, detectedText) {
+            verificationResult.style.display = 'block';
+            const card = document.getElementById('result-card');
+            const icon = document.getElementById('result-icon');
+            const title = document.getElementById('result-title');
+            const text = document.getElementById('result-text');
+            const takeBtn = document.getElementById('proceed-take-btn');
+
+            if (success) {
+                card.className = 'card match-success';
+                icon.innerHTML = `<i data-lucide="check-circle" size="64" color="#059669"></i>`;
+                title.textContent = "✅ Verified Safe";
+                text.innerHTML = `Identified: <strong>${expectedName}</strong><br><small style="color:var(--text-muted)">Matched in scanned text: "${detectedText.substring(0, 30)}..."</small>`;
+                takeBtn.style.display = 'block';
+            } else {
+                card.className = 'card match-fail';
+                icon.innerHTML = `<i data-lucide="alert-triangle" size="64" color="#dc2626"></i>`;
+                title.textContent = "❌ Verification Failed";
+
+                const schedule = getData(STORAGE_KEYS.SCHEDULE) || [];
+                const medNames = schedule.map(m => m.name).join(', ');
+
+                text.innerHTML = `No match found for scheduled medicines: <strong>${medNames || 'None'}</strong><br><small style="color:var(--text-muted)">Detected text: "${detectedText.substring(0, 50)}..."</small>`;
+                takeBtn.style.display = 'none';
+            }
+            lucide.createIcons();
+        }
+
+        // Initialize: Show what we are looking for
+        document.addEventListener('DOMContentLoaded', () => {
+            const schedule = getData(STORAGE_KEYS.SCHEDULE) || [];
+            if (schedule.length > 0) {
+                const medList = schedule.map(m => `<span class="badge">${m.name}</span>`).join(' ');
+                const infoDiv = document.createElement('div');
+                infoDiv.style.marginTop = '1rem';
+                infoDiv.style.fontSize = '0.85rem';
+                infoDiv.innerHTML = `<p style="margin-bottom:0.5rem">Ready to verify any of these:</p>${medList}`;
+                document.querySelector('.card p').after(infoDiv);
+            }
+        });
+
+        document.getElementById('proceed-take-btn').onclick = () => {
+            // Log the verification
+            const logs = getData(STORAGE_KEYS.LOGS) || [];
+            logs.unshift({
+                time: new Date().toLocaleTimeString(),
+                date: new Date().toLocaleDateString(),
+                event: "Medicine Verified & Taken",
+                icon: "check-circle",
+                color: "var(--secondary)"
+            });
+            saveData(STORAGE_KEYS.LOGS, logs);
+            location.href = 'index.html';
+        };
+    </script>
+</body>
+
+</html>

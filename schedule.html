@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medicine Schedule - NaniNana CARE</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <header>
+        <div class="container" style="display: flex; align-items: center; gap: 1rem;">
+            <a href="index.html" style="color: var(--text-main);"><i data-lucide="arrow-left"></i></a>
+            <h1 style="font-size: 1.5rem; margin: 0;">NaniNana CARE</h1>
+        </div>
+    </header>
+
+    <main class="container">
+        <div id="schedule-list">
+            <!-- Items injected via JS -->
+        </div>
+
+        <div id="empty-state" class="card fade-in" style="display: none; text-align: center; padding: 3rem;">
+            <i data-lucide="calendar-x" size="48" style="color: var(--text-muted); margin-bottom: 1rem;"></i>
+            <p style="color: var(--text-muted);">No medicines scheduled yet.</p>
+            <button class="btn btn-primary" style="margin-top: 1.5rem;" onclick="location.href='upload.html'">
+                <i data-lucide="plus"></i> Add Medicine
+            </button>
+        </div>
+
+        <button class="btn btn-outline fade-in" style="margin-bottom: 2rem;" onclick="addManual()">
+            <i data-lucide="plus-circle"></i> Add Manually
+        </button>
+    </main>
+
+    <nav class="nav-bottom">
+        <a href="index.html" class="nav-item">
+            <i data-lucide="home"></i>
+            <span>Home</span>
+        </a>
+        <a href="schedule.html" class="nav-item active">
+            <i data-lucide="calendar"></i>
+            <span>Schedule</span>
+        </a>
+        <a href="reminder.html" class="nav-item">
+            <i data-lucide="bell"></i>
+            <span>Reminders</span>
+        </a>
+        <a href="profile.html" class="nav-item">
+            <i data-lucide="user"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <script src="app.js"></script>
+    <script>
+        lucide.createIcons();
+
+        function renderSchedule() {
+            const schedule = getData(STORAGE_KEYS.SCHEDULE) || [];
+            const list = document.getElementById('schedule-list');
+            const empty = document.getElementById('empty-state');
+
+            if (schedule.length === 0) {
+                list.style.display = 'none';
+                empty.style.display = 'block';
+                return;
+            }
+
+            list.style.display = 'block';
+            empty.style.display = 'none';
+            list.innerHTML = '';
+
+            schedule.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'card fade-in';
+                card.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div>
+                            <h3 style="margin-bottom: 0.25rem;">${item.name}</h3>
+                            <p style="color: var(--text-muted); font-weight: 600;">${item.dose}</p>
+                            <p style="color: var(--primary); margin-top: 0.5rem; display: flex; align-items: center; gap: 0.25rem;">
+                                <i data-lucide="clock" size="16"></i> ${item.time} (${item.frequency})
+                            </p>
+                        </div>
+                        <button onclick="removeItem(${index})" style="background: none; border: none; color: var(--danger); cursor: pointer;">
+                            <i data-lucide="trash-2"></i>
+                        </button>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        function removeItem(index) {
+            const schedule = getData(STORAGE_KEYS.SCHEDULE);
+            schedule.splice(index, 1);
+            saveData(STORAGE_KEYS.SCHEDULE, schedule);
+            renderSchedule();
+        }
+
+        function addManual() {
+            const name = prompt("Medicine Name:");
+            if (!name) return;
+            const dose = prompt("Dosage (e.g. 500mg):", "500mg");
+            const time = prompt("Time (24h format HH:MM):", "08:00");
+
+            const schedule = getData(STORAGE_KEYS.SCHEDULE) || [];
+            schedule.push({ name, dose, time, frequency: "Daily" });
+            saveData(STORAGE_KEYS.SCHEDULE, schedule);
+            renderSchedule();
+        }
+
+        renderSchedule();
+    </script>
+</body>
+
+</html>

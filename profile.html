@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Profile - NaniNana CARE</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <header>
+        <div class="container" style="display: flex; align-items: center; gap: 1rem;">
+            <a href="index.html" style="color: var(--text-main);"><i data-lucide="arrow-left"></i></a>
+            <h1 style="font-size: 1.5rem; margin: 0;">NaniNana CARE</h1>
+        </div>
+    </header>
+
+    <main class="container">
+        <form id="profile-form">
+            <div class="card fade-in">
+                <h3>Personal Information</h3>
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="p-name" placeholder="Enter patient name" required>
+                </div>
+                <div class="form-group">
+                    <label>Age</label>
+                    <input type="number" id="p-age" placeholder="Enter age" required>
+                </div>
+                <div class="form-group">
+                    <label>Language</label>
+                    <select id="p-lang">
+                        <option value="en">English</option>
+                        <option value="hi">Hindi</option>
+                        <option value="es">Spanish</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="card fade-in">
+                <h3>Emergency Contacts</h3>
+                <div class="form-group">
+                    <label>Family Member Number</label>
+                    <input type="tel" id="p-family" placeholder="Family contact number" required>
+                </div>
+                <div class="form-group">
+                    <label>Doctor's Number</label>
+                    <input type="tel" id="p-doctor" placeholder="Doctor's contact number">
+                </div>
+                <div class="form-group">
+                    <label>Emergency Service</label>
+                    <input type="tel" id="p-emergency" value="102" readonly>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary fade-in">
+                <i data-lucide="save"></i> Save Changes
+            </button>
+        </form>
+
+        <div id="success-msg" class="status-badge status-success"
+            style="display: none; width: 100%; text-align: center; margin-top: 1rem; padding: 1rem;">
+            Profile updated successfully!
+        </div>
+    </main>
+
+    <script src="app.js"></script>
+    <script>
+        lucide.createIcons();
+
+        const form = document.getElementById('profile-form');
+        const profile = getData(STORAGE_KEYS.PROFILE);
+
+        // Load existing data
+        if (profile) {
+            document.getElementById('p-name').value = profile.name || '';
+            document.getElementById('p-age').value = profile.age || '';
+            document.getElementById('p-family').value = profile.familyContact || '';
+            document.getElementById('p-doctor').value = profile.doctorContact || '';
+        }
+
+        form.onsubmit = (e) => {
+            e.preventDefault();
+            const newProfile = {
+                name: document.getElementById('p-name').value,
+                age: document.getElementById('p-age').value,
+                familyContact: document.getElementById('p-family').value,
+                doctorContact: document.getElementById('p-doctor').value,
+                lang: document.getElementById('p-lang').value
+            };
+            saveData(STORAGE_KEYS.PROFILE, newProfile);
+
+            const msg = document.getElementById('success-msg');
+            msg.style.display = 'block';
+            setTimeout(() => { msg.style.display = 'none'; }, 3000);
+        };
+    </script>
+</body>
+
+</html>

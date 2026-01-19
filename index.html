@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ElderCare - Medicine Assistant</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <header>
+        <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
+            <h1 style="font-size: 1.5rem; margin: 0; color: var(--primary);">NaniNana CARE</h1>
+            <a href="profile.html" style="color: var(--text-muted);"><i data-lucide="user-circle" size="32"></i></a>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Emotional Greeting -->
+        <div class="fade-in" style="margin-bottom: 2rem; color: white;">
+            <p style="font-size: 1.25rem; opacity: 0.9; margin-bottom: 0.25rem;">Good evening,</p>
+            <h1 id="user-greeting" style="font-size: 2.5rem; line-height: 1.1;">Dearest Parent</h1>
+            <p
+                style="font-size: 1.1rem; opacity: 0.8; margin-top: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i data-lucide="heart" class="heart-beat" style="color: var(--accent); fill: var(--accent);"
+                    size="20"></i>
+                We are watching over you today.
+            </p>
+        </div>
+
+        <!-- Main Action: Quick Scan -->
+        <div class="card fade-in"
+            style="background: white; text-align: center; padding: 2.5rem 1.5rem; border: none; position: relative; overflow: hidden;">
+            <div style="position: absolute; top: -20px; right: -20px; opacity: 0.05;">
+                <i data-lucide="scan" size="150" style="color: var(--primary);"></i>
+            </div>
+
+            <i data-lucide="camera" size="56"
+                style="color: var(--primary); margin-bottom: 1rem; background: var(--primary-light); padding: 1rem; border-radius: 1.5rem;"></i>
+            <h2 style="font-size: 2rem; margin-bottom: 0.5rem;">Medicine Scanner</h2>
+            <p
+                style="color: var(--text-muted); font-size: 1.15rem; margin-bottom: 2rem; max-width: 80%; margin-left: auto; margin-right: auto;">
+                Scan your medicine strip or prescription to be safe and sure.
+            </p>
+            <button class="btn btn-primary" onclick="location.href='verify.html'">
+                <i data-lucide="scan"></i> Start Scanning
+            </button>
+        </div>
+
+        <!-- Next Dose Card -->
+        <div id="next-dose-container" class="card fade-in"
+            style="padding: 1.5rem; border-left: 6px solid var(--warning); background: #fffcf0;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                    <p
+                        style="text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.1em; color: var(--warning); font-weight: 800; margin-bottom: 0.5rem;">
+                        Upcoming Dose</p>
+                    <h3 style="font-size: 1.5rem; margin-bottom: 0.25rem;">Loading...</h3>
+                    <p style="color: var(--text-muted); font-size: 1.1rem;"><i data-lucide="clock" size="18"
+                            style="vertical-align: middle;"></i> Checking schedule...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Secondary Actions Grid -->
+        <div class="grid fade-in">
+            <a href="upload.html" class="card"
+                style="text-decoration: none; color: inherit; text-align: center; padding: 1.5rem 1rem; margin-bottom: 0;">
+                <div
+                    style="background: #e0f2fe; width: 48px; height: 48px; border-radius: 1rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.75rem;">
+                    <i data-lucide="file-text" style="color: #0369a1;" size="24"></i>
+                </div>
+                <p style="font-weight: 700; font-size: 1rem;">Upload Docs</p>
+            </a>
+            <a href="schedule.html" class="card"
+                style="text-decoration: none; color: inherit; text-align: center; padding: 1.5rem 1rem; margin-bottom: 0;">
+                <div
+                    style="background: #f0f9ff; width: 48px; height: 48px; border-radius: 1rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.75rem;">
+                    <i data-lucide="calendar" style="color: var(--primary);" size="24"></i>
+                </div>
+                <p style="font-weight: 700; font-size: 1rem;">My Schedule</p>
+            </a>
+        </div>
+
+        <div class="card fade-in"
+            style="margin-top: 1.25rem; background: rgba(255, 255, 255, 0.5); text-align: center; padding: 1.5rem;">
+            <p style="color: var(--text-muted); margin-bottom: 1rem; font-style: italic;">"Take care of yourself, you
+                are loved."</p>
+            <div style="display: flex; gap: 1rem;">
+                <button class="btn btn-outline" style="border-radius: 1rem;" onclick="location.href='reports.html'">
+                    <i data-lucide="bar-chart-2"></i> Reports
+                </button>
+                <button class="btn btn-danger" style="border-radius: 1rem;" onclick="window.open('tel:102')">
+                    <i data-lucide="phone-call"></i> SOS
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <nav class="nav-bottom">
+        <a href="index.html" class="nav-item active">
+            <i data-lucide="home"></i>
+            <span>Home</span>
+        </a>
+        <a href="schedule.html" class="nav-item">
+            <i data-lucide="calendar"></i>
+            <span>Schedule</span>
+        </a>
+        <a href="reminder.html" class="nav-item">
+            <i data-lucide="bell"></i>
+            <span>Reminders</span>
+        </a>
+        <a href="profile.html" class="nav-item">
+            <i data-lucide="user"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <script src="app.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>

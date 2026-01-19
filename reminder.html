@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reminders - NaniNana CARE</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <header>
+        <div class="container" style="display: flex; align-items: center; gap: 1rem;">
+            <a href="index.html" style="color: var(--text-main);"><i data-lucide="arrow-left"></i></a>
+            <h1 style="font-size: 1.5rem; margin: 0;">NaniNana CARE</h1>
+        </div>
+    </header>
+
+    <main class="container">
+        <div id="active-reminder" class="card fade-in" style="background: #eff6ff; border: 2px solid var(--primary);">
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+                <div class="status-badge status-warning" style="margin-bottom: 0.5rem;">DUE NOW</div>
+                <h2 id="rem-name" style="font-size: 2rem; margin-bottom: 0;">Paracetamol</h2>
+                <p id="rem-dose" style="font-size: 1.25rem; color: var(--text-muted);">500mg</p>
+                <p id="rem-time" style="font-weight: 700; color: var(--primary);"><i data-lucide="clock" size="18"></i>
+                    08:30 PM</p>
+            </div>
+
+            <div style="display: grid; gap: 1rem;">
+                <button class="btn btn-primary" style="background: var(--secondary);" onclick="logDose('Taken')">
+                    <i data-lucide="check-circle"></i> Mark as Taken
+                </button>
+                <button class="btn btn-primary" onclick="location.href='verify.html'">
+                    <i data-lucide="scan"></i> Scan to Verify First
+                </button>
+                <button class="btn btn-outline" style="color: var(--danger); border-color: var(--danger);"
+                    onclick="logDose('Missed')">
+                    <i data-lucide="x-circle"></i> Mark as Missed
+                </button>
+            </div>
+        </div>
+
+        <div id="no-reminder" class="card fade-in" style="display: none; text-align: center; padding: 3rem;">
+            <i data-lucide="smile" size="48" style="color: var(--secondary); margin-bottom: 1rem;"></i>
+            <h3>All done for now!</h3>
+            <p style="color: var(--text-muted);">Your next medicine is tomorrow at 08:00 AM.</p>
+        </div>
+
+        <h3 style="margin-top: 2rem;">Recent History</h3>
+        <div id="mini-logs">
+            <!-- Recent logs injected here -->
+        </div>
+    </main>
+
+    <nav class="nav-bottom">
+        <a href="index.html" class="nav-item">
+            <i data-lucide="home"></i>
+            <span>Home</span>
+        </a>
+        <a href="schedule.html" class="nav-item">
+            <i data-lucide="calendar"></i>
+            <span>Schedule</span>
+        </a>
+        <a href="reminder.html" class="nav-item active">
+            <i data-lucide="bell"></i>
+            <span>Reminders</span>
+        </a>
+        <a href="profile.html" class="nav-item">
+            <i data-lucide="user"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <script src="app.js"></script>
+    <script>
+        lucide.createIcons();
+
+        function loadReminder() {
+            const schedule = getData(STORAGE_KEYS.SCHEDULE) || [];
+            const activeDiv = document.getElementById('active-reminder');
+            const noneDiv = document.getElementById('no-reminder');
+
+            if (schedule.length === 0) {
+                activeDiv.style.display = 'none';
+                noneDiv.style.display = 'block';
+                return;
+            }
+
+            // Simple logic: show first item in schedule as "upcoming"
+            const item = schedule[0];
+            document.getElementById('rem-name').textContent = item.name;
+            document.getElementById('rem-dose').textContent = item.dose;
+            document.getElementById('rem-time').innerHTML = `<i data-lucide="clock" size="18"></i> ${item.time}`;
+            lucide.createIcons();
+        }
+
+        function logDose(status) {
+            const schedule = getData(STORAGE_KEYS.SCHEDULE) || [];
+            if (schedule.length === 0) return;
+
+            const logs = getData(STORAGE_KEYS.LOGS) || [];
+            const newLog = {
+                medicine: schedule[0].name,
+                dose: schedule[0].dose,
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                date: new Date().toLocaleDateString(),
+                status: status
+            };
+            logs.unshift(newLog);
+            saveData(STORAGE_KEYS.LOGS, logs);
+
+            if (status === 'Missed') {
+                const alerts = getData(STORAGE_KEYS.ALERTS) || [];
+                alerts.unshift({
+                    type: 'Missed Dose',
+                    medicine: newLog.medicine,
+                    time: newLog.time,
+                    date: newLog.date,
+                    contact: getData(STORAGE_KEYS.PROFILE)?.familyContact || 'Emergency Contact'
+                });
+                saveData(STORAGE_KEYS.ALERTS, alerts);
+                alert("Family Alert Sent! (Simulation)");
+            }
+
+            renderLogs();
+
+            // For demo: hide reminder area after action
+            document.getElementById('active-reminder').style.display = 'none';
+            document.getElementById('no-reminder').style.display = 'block';
+        }
+
+        function renderLogs() {
+            const logs = getData(STORAGE_KEYS.LOGS) || [];
+            const container = document.getElementById('mini-logs');
+            container.innerHTML = '';
+
+            logs.slice(0, 3).forEach(log => {
+                const item = document.createElement('div');
+                item.className = 'card fade-in';
+                item.style.padding = '0.75rem 1rem';
+                item.style.marginBottom = '0.5rem';
+                item.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <p style="font-weight: 600;">${log.medicine}</p>
+                            <p style="font-size: 0.8rem; color: var(--text-muted);">${log.date} at ${log.time}</p>
+                        </div>
+                        <span class="status-badge ${log.status === 'Taken' ? 'status-success' : 'status-warning'}">${log.status}</span>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        loadReminder();
+        renderLogs();
+    </script>
+</body>
+
+</html>
